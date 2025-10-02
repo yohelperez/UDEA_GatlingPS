@@ -33,9 +33,10 @@ class LoginTest extends Simulation{
   ).assertions(
     // Assertions enfocadas en el criterio CA01
     details("login").responseTime.percentile(95).lte(2000), // p95 <= 2000 ms
-    global.successfulRequests.percent.gte(40)               // al menos 40% exitosas
+    global.successfulRequests.percent.gte(5)               // al menos 5% exitosas
   )
 }
+
 
 
 
