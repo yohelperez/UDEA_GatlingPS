@@ -2,6 +2,7 @@ package parabank
 
 import io.gatling.core.Predef._
 import io.gatling.http.Predef._
+import scala.concurrent.duration._
 import parabank.Data._
 
 class LoginTest extends Simulation{
@@ -22,6 +23,6 @@ class LoginTest extends Simulation{
 
   // 3 Load Scenario
   setUp(
-    scn.inject(rampUsersPerSec(5).to(15).during(30))
+    scn.inject(constantConcurrentUsers(100) during (5.minutes))
   ).protocols(httpConf);
 }
