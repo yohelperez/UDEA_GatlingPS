@@ -23,6 +23,7 @@ class LoginTest extends Simulation{
 
   // 3 Load Scenario
   setUp(
-    scn.inject(constantConcurrentUsers(100) during (5.minutes))
+    scn.inject(constantConcurrentUsers(100) during (3.minutes))
   ).protocols(httpConf);
 }
+
