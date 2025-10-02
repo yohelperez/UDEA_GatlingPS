@@ -25,8 +25,15 @@ class LoginTest extends Simulation{
   setUp(
     scn.inject(
       rampUsers(100).during(60.seconds))
-  ).protocols(httpConf);
+  ).protocols(httpConf)
+   .assertions(
+     // Aserciones más realistas para sistema de demostración
+     global.responseTime.max.lt(10000),    // Máximo 10 segundos
+     global.responseTime.mean.lt(5000),    // Promedio menor a 5 segundos
+     global.successfulRequests.percent.gt(80)  // Más del 80% de éxito
+   )
 }
+
 
 
 
