@@ -34,3 +34,4 @@ class LoginPeakSimulation extends Simulation{
     global.responseTime.max.lte(5000),                      // máximo <= 5s como backstop
     //global.successfulRequests.percent.gte(98)               // tolerancia ligeramente menor en pico
   )
+}
