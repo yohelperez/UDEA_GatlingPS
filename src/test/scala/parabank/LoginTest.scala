@@ -36,7 +36,7 @@ class LoginTest extends Simulation{
     )
 
   // Escenario 2: Carga Pico - 200 usuarios concurrentes  
-  val peakLoadScenario = setUp(
+  /*val peakLoadScenario = setUp(
     scn.inject(
       // Inyección más agresiva para simular carga pico
       rampUsers(200).during(30.seconds) // 30 segundos para alcanzar los 200 usuarios
@@ -60,8 +60,9 @@ class LoginTest extends Simulation{
       rampUsersPerSec(100).to(10).during(2.minutes)
     )
   ).protocols(httpConf)
-    .maxDuration(20.minutes)
+    .maxDuration(20.minutes) */
 }
+
 
 
 
