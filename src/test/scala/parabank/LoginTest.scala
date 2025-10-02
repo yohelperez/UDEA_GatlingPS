@@ -19,20 +19,24 @@ class LoginTest extends Simulation{
       .get(s"/login/$username/$password")
        //Recibir información de la cuenta
       .check(status.is(200))
-    )
+    ).pause(1) // breve pausa para no bombardear instantáneamente
 
   // 3 Load Scenario
+  // 3 - Injection (closed model): ramp-up suave, luego steady-state a 100 concurrentes
+  val injectionProfile = Seq(
+    rampConcurrentUsers(0) to 100 during (30.seconds), // warm-up / ramp
+    constantConcurrentUsers(100) during (3.minutes)    // steady state para medir p95
+  )
+
   setUp(
-    scn.inject(
-      rampUsers(100).during(60.seconds))
-  ).protocols(httpConf)
-   .assertions(
-     // Aserciones más realistas para sistema de demostración
-     global.responseTime.max.lt(10000),    // Máximo 10 segundos
-     global.responseTime.mean.lt(5000),    // Promedio menor a 5 segundos
-     global.successfulRequests.percent.gt(80)  // Más del 80% de éxito
-   )
+    scn.inject(injectionProfile).protocols(httpConf)
+  ).assertions(
+    // Assertions enfocadas en el criterio CA01
+    details("login").responseTime.percentile(95).lte(2000), // p95 <= 2000 ms
+    global.successfulRequests.percent.gte(99)               // al menos 99% exitosas
+  )
 }
+
 
 
 
