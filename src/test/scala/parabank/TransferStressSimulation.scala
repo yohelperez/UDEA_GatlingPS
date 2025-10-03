@@ -21,6 +21,22 @@ class TransferStressSimulation extends Simulation {
     )
     .pause(1)
 
+    .feed(accountsFeeder)
+    .exec(
+      http("GetAccountHistory")
+        .get("/accounts/${accountId}/transactions?cb=${cb}")
+        .check(status.is(200))
+      .check(jsonPath("$[0].id").exists)
+      .check(bodyString.saveAs("resp"))
+    )
+    .pause(1)
+    .exec { session =>
+      if (System.getProperty("gatling.debug") == "true") {
+        println("RESP: " + session("resp").asOption[String].getOrElse("<no body>"))
+      }
+      session
+    }
+
   // 2️. Feeder desde CSV con datos de cuentas y montos
   val feeder = csv("transacciones.csv").circular
   // Formato esperado del CSV:
