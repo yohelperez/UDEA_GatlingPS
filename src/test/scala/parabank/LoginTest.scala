@@ -24,5 +24,4 @@ class LoginTest extends Simulation{
   setUp(
     scn.inject(rampUsersPerSec(5).to(15).during(30))
   ).protocols(httpConf);
-
 }
