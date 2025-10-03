@@ -36,7 +36,7 @@ class ParaBankAccountHistorySimulation extends Simulation {
     .feed(accountsFeeder)
     .exec(
       http("GetAccountHistory")
-        .get(s"/accounts/${accountId}/transactions?cb=${cb}")
+        .get("/accounts/${accountId}/transactions?cb=${cb}")
         .check(status.is(200))
         .check(jsonPath("$.transactions").exists)
     )
