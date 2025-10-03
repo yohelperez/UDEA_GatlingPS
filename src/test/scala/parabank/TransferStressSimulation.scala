@@ -7,43 +7,38 @@ import parabank.Data._
 
 class TransferStressSimulation extends Simulation {
 
-  // 1 - HTTP conf
+  // 1️⃣ Configuración HTTP
   val httpConf = http
     .baseUrl(url)
-    .acceptHeader("application/json")
     .header("Content-Type", "application/json")
+    .check(status.is(200)) // Toda transferencia debe ser exitosa
 
+  // 2️⃣ Feeder desde CSV con datos de cuentas y montos
   val feeder = csv("transacciones.csv").circular
 
-  // 3 - Escenario: primer login, luego transfer
-  val scn = scenario("TransferenciasConcurrentesConLogin")
-    .exec(
-      http("Login")
-        .get(s"/login/$username/$password")
-        .check(status.is(200))
-    )
-    .pause(500.millis) // pequeña pausa para simular comportamiento real
+  // 3️⃣ Escenario de transferencia bancaria
+  val scn = scenario("Transferencias Concurrentes")
     .feed(feeder)
     .exec(
-      http("Transferencia")
+      http("transferencia")
         .post("/transfer")
         .queryParam("fromAccountId", "${fromAccountId}")
         .queryParam("toAccountId", "${toAccountId}")
         .queryParam("amount", "${amount}")
-        .check(status.is(200)) // espera 200 si todo ok
+        .check(status.is(200))
     )
 
-  // 4 - Inyección (para alcanzar ~150 TPS usamos open model con tasa)
+  // 4️⃣ Inyección de carga para cumplir criterio de 150 TPS sostenidos
   val injectionProfile = Seq(
-    rampUsersPerSec(50) to 150 during (30.seconds), // warm-up
-    constantUsersPerSec(150) during (2.minutes)     // manter 150 requests/s
+    rampUsersPerSec(50) to 150 during (30.seconds), // Calentamiento progresivo
+    constantUsersPerSec(150) during (2.minutes)     // Mantener 150 TPS
   )
 
-  // 5 - Setup con assertions
+  // 5️⃣ Assertions para validar estabilidad bajo estrés
   setUp(
     scn.inject(injectionProfile).protocols(httpConf)
   ).assertions(
-    global.successfulRequests.percent.gte(99),      // no perder transacciones
-    global.responseTime.percentile(95).lte(2000)    // latencia objetivo (opcional)
+    global.successfulRequests.percent.gte(99),   // No deben perderse transferencias
+    global.responseTime.percentile(95).lte(2000) // Opcional: latencia aceptable
   )
 }
