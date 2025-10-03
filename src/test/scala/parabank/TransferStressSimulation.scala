@@ -13,6 +13,14 @@ class TransferStressSimulation extends Simulation {
     .header("Content-Type", "application/json")
     .check(status.is(200)) // Toda transferencia debe ser exitosa
 
+  val scn = scenario("AccountHistory")
+    .exec(
+      http("login")
+        .get(s"/login/$username/$password")
+        .check(status.is(200))
+    )
+    .pause(1)
+
   // 2️. Feeder desde CSV con datos de cuentas y montos
   val feeder = csv("transacciones.csv").circular
   // Formato esperado del CSV:
