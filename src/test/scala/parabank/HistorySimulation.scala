@@ -1,13 +1,16 @@
 package parabank
 
 import io.gatling.core.Predef._
+import io.gatling.core.config.GatlingConfiguration
 import io.gatling.http.Predef._
 import scala.concurrent.duration._
 import java.time.Instant
 import scala.util.Random
 import parabank.Data._
 
-class ParaBankAccountHistorySimulation extends Simulation {
+class HistorySimulation extends Simulation {
+
+  implicit val configuration: GatlingConfiguration = GatlingConfiguration.loadForTest()
 
   // 1 Http Conf
   val httpConf = http
