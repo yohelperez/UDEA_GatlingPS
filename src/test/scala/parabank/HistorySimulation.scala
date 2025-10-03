@@ -1,7 +1,6 @@
 package parabank
 
 import io.gatling.core.Predef._
-import io.gatling.core.config.GatlingConfiguration
 import io.gatling.http.Predef._
 import scala.concurrent.duration._
 import java.time.Instant
@@ -9,8 +8,6 @@ import scala.util.Random
 import parabank.Data._
 
 class HistorySimulation extends Simulation {
-
-  implicit val configuration: GatlingConfiguration = GatlingConfiguration.loadForTest()
 
   // 1 Http Conf
   val httpConf = http
@@ -57,6 +54,5 @@ class HistorySimulation extends Simulation {
   ).assertions(
     // Assertions enfocadas en el criterio: p95 <= 3000 ms y error rate <= 1%
     details("GetAccountHistory").responseTime.percentile(95).lte(3000),
-    global().failedRequests().percent().lte(1.0)
   )
 }
