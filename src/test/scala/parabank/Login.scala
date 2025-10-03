@@ -4,7 +4,7 @@ import io.gatling.core.Predef._
 import io.gatling.http.Predef._
 import parabank.Data._
 
-class LoginTest extends Simulation{
+class Login extends Simulation{
 
   // 1 Http Conf
   val httpConf = http.baseUrl(url)
