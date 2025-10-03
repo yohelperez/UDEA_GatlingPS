@@ -39,6 +39,6 @@ class TransferStressSimulation extends Simulation {
     scn.inject(injectionProfile).protocols(httpConf)
   ).assertions(
     global.successfulRequests.percent.gte(99),   // No deben perderse transferencias
-    global.responseTime.percentile(95).lte(2000) // Opcional: latencia aceptable
+    global.responseTime.percentile(95).lte(2000) // latencia aceptable
   )
 }
