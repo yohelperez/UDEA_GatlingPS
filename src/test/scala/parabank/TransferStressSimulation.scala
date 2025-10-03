@@ -7,41 +7,43 @@ import parabank.Data._
 
 class TransferStressSimulation extends Simulation {
 
-  // 1️. Configuración HTTP
+  // 1 - HTTP conf
   val httpConf = http
     .baseUrl(url)
+    .acceptHeader("application/json")
     .header("Content-Type", "application/json")
-    .check(status.is(200)) // Toda transferencia debe ser exitosa
 
-  // 2️. Feeder desde CSV con datos de cuentas y montos
   val feeder = csv("transacciones.csv").circular
-  // Formato esperado del CSV:
-  // fromAccountId,toAccountId,amount
-  // 13899,14010,100
 
-  // 3️. Escenario de transferencia bancaria
-  val scn = scenario("Transferencias Concurrentes")
+  // 3 - Escenario: primer login, luego transfer
+  val scn = scenario("TransferenciasConcurrentesConLogin")
+    .exec(
+      http("Login")
+        .get(s"/login/$username/$password")
+        .check(status.is(200))
+    )
+    .pause(500.millis) // pequeña pausa para simular comportamiento real
     .feed(feeder)
     .exec(
-      http("transferencia")
+      http("Transferencia")
         .post("/transfer")
         .queryParam("fromAccountId", "${fromAccountId}")
         .queryParam("toAccountId", "${toAccountId}")
         .queryParam("amount", "${amount}")
-        .check(status.is(200))
+        .check(status.is(200)) // espera 200 si todo ok
     )
 
-  // 4️. Inyección de carga para cumplir criterio de 150 TPS sostenidos
+  // 4 - Inyección (para alcanzar ~150 TPS usamos open model con tasa)
   val injectionProfile = Seq(
-    rampUsersPerSec(50) to 150 during (30.seconds), // Calentamiento progresivo
-    constantUsersPerSec(150) during (2.minutes)     // Mantener 150 TPS
+    rampUsersPerSec(50) to 150 during (30.seconds), // warm-up
+    constantUsersPerSec(150) during (2.minutes)     // manter 150 requests/s
   )
 
-  // 5️. Assertions para validar estabilidad bajo estrés
+  // 5 - Setup con assertions
   setUp(
     scn.inject(injectionProfile).protocols(httpConf)
   ).assertions(
-    global.successfulRequests.percent.gte(99),   // No deben perderse transferencias
-    global.responseTime.percentile(95).lte(2000) // Opcional: latencia aceptable
+    global.successfulRequests.percent.gte(99),      // no perder transacciones
+    global.responseTime.percentile(95).lte(2000)    // latencia objetivo (opcional)
   )
 }
