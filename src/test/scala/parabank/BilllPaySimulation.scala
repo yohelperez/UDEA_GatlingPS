@@ -35,23 +35,22 @@ class BillPaySimulation extends Simulation {
           }"""
         ))
         .check(status.is(200))
+        // ✅ VERIFICACIONES QUE SÍ FUNCIONAN (más flexibles)
         .check(jsonPath("$.payeeName").is("${payeeName}"))
         .check(jsonPath("$.accountId").is("${accountId}"))
-        .check(jsonPath("$.amount").ofType[Double])
+        .check(jsonPath("$.amount").ofType[Double]) // ✅ Solo verifica que sea número, no el formato exacto
     )
 
-  // ✅ 2 minutos en estado estable
+  // ✅ 2 minutos en estado estable (como querías)
   val injectionProfile = Seq(
-    rampConcurrentUsers(0) to 200 during (60.seconds),  // 1 minuto de rampa
-    constantConcurrentUsers(200) during (2.minutes)     // 2 minutos estado estable
+    rampConcurrentUsers(0) to 200 during (60.seconds),
+    constantConcurrentUsers(200) during (2.minutes)
   )
 
   setUp(
     scn.inject(injectionProfile).protocols(httpConf)
   ).assertions(
-    // Criterio 1: Tiempo de respuesta <= 3 segundos (p95)
     details("Bill Payment").responseTime.percentile(95).lte(3000),
-    // Criterio 2: Tasa de errores <= 1%
     global.failedRequests.percent.lte(1.0)
   )
 }
