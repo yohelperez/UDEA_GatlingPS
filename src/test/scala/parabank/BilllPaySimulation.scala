@@ -18,7 +18,7 @@ class BillPaySimulation extends Simulation {
   // 2 Feeder desde archivo CSV (ubicado en src/test/resources/data/billpay-data.csv)
   val feeder = csv("billpay-data.csv").circular
 
-  // 3 Scenario Definition - Flujo REAL de pago de facturas
+  // 3 Scenario Definition - Flujo REAL de pago de facturas 
   val scn = scenario("BillPay")
     .exec(
       http("login")
