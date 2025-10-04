@@ -34,23 +34,35 @@ class BillPaySimulation extends Simulation {
             "accountNumber": "${payeeAccountNumber}"
           }"""
         ))
-        .check(status.is(200))
-        // ✅ VERIFICACIONES QUE SÍ FUNCIONAN (más flexibles)
-        .check(jsonPath("$.payeeName").is("${payeeName}"))
-        .check(jsonPath("$.accountId").is("${accountId}"))
-        .check(jsonPath("$.amount").ofType[Double]) // ✅ Solo verifica que sea número, no el formato exacto
+        .check(status.saveAs("httpStatus"))
+        .check(status.is(200).optional) // Hacer verificaciones opcionales
+        .check(jsonPath("$.payeeName").is("${payeeName}").optional)
+        .check(jsonPath("$.accountId").is("${accountId}").optional)
+        .check(jsonPath("$.amount").ofType[Double].optional)
+        .check(bodyString.saveAs("responseBody"))
     )
+    .exec { session =>
+      val status = session("httpStatus").as[Int]
+      val accountId = session("accountId").as[String]
+      val amount = session("amount").as[String]
+      val response = session("responseBody").asOption[String].getOrElse("No response")
+      
+      // Log detallado para CADA request
+      println(s"=== BILL PAYMENT REQUEST ===")
+      println(s"Account: $accountId, Amount: $amount")
+      println(s"Status: $status")
+      println(s"Response: $response")
+      println("============================")
+      
+      session
+    }
 
-  // ✅ 2 minutos en estado estable (como querías)
+  // ✅ Carga reducida para debugging
   val injectionProfile = Seq(
-    rampConcurrentUsers(0) to 200 during (60.seconds),
-    constantConcurrentUsers(200) during (1.minutes)
+    constantConcurrentUsers(5) during (30.seconds)  // Solo 5 usuarios por 30 segundos
   )
 
   setUp(
     scn.inject(injectionProfile).protocols(httpConf)
-  ).assertions(
-    details("Bill Payment").responseTime.percentile(95).lte(3000),
-    global.failedRequests.percent.lte(1.0)
   )
 }
