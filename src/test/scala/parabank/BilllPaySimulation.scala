@@ -16,6 +16,7 @@ class BillPaySimulation extends Simulation {
 
   val scn = scenario("BillPayUnderLoad")
     .feed(feeder)
+    .pause(1.second)  // ✅ Pausa entre requests
     .exec(
       http("Bill Payment")
         .post("/billpay")
@@ -34,9 +35,14 @@ class BillPaySimulation extends Simulation {
             "accountNumber": "${payeeAccountNumber}"
           }"""
         ))
-        // Solo guardamos el status y el body, sin verificaciones que fallen
+        // Guardamos status y body para logs
         .check(status.saveAs("httpStatus"))
         .check(bodyString.saveAs("responseBody"))
+        // Verificaciones (pueden fallar pero no detienen el test)
+        .check(status.is(200).silently)
+        .check(jsonPath("$.payeeName").is("${payeeName}").silently)
+        .check(jsonPath("$.accountId").is("${accountId}").silently)
+        .check(jsonPath("$.amount").ofType[Double].silently)
     )
     .exec { session =>
       val status = session("httpStatus").as[Int]
@@ -54,12 +60,16 @@ class BillPaySimulation extends Simulation {
       session
     }
 
-  // ✅ Carga reducida para debuggin 
+  // ✅ 200 USUARIOS CONCURRENTES como requiere tu historia
   val injectionProfile = Seq(
-    constantConcurrentUsers(5) during (30.seconds)  // Solo 5 usuarios por 30 segundos
+    rampConcurrentUsers(0) to 200 during (120.seconds),  // ramp 0->200 en 2 min
+    constantConcurrentUsers(200) during (1.minutes)      // 200 usuarios por 1 min
   )
 
   setUp(
     scn.inject(injectionProfile).protocols(httpConf)
+  ).assertions(
+    details("Bill Payment").responseTime.percentile(95).lte(3000),
+    global.failedRequests.percent.lte(1.0)
   )
 }
