@@ -46,12 +46,12 @@ class BillPaySimulation extends Simulation {
       val response = session("responseBody").asOption[String].getOrElse("No response")
       
       // Log detallado para CADA request
-      println(s"=== BILL PAYMENT REQUEST ===")
+      /*println(s"=== BILL PAYMENT REQUEST ===")
       println(s"Account: $accountId, Amount: $amount")
       println(s"Status: $status")
       println(s"Response: $response")
-      println("============================")
-      
+      println("============================")*/
+
       session
     }
 
