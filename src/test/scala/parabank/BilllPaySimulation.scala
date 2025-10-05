@@ -54,7 +54,7 @@ class BillPaySimulation extends Simulation {
       session
     }
 
-  // ✅ Carga reducida para debugging
+  // ✅ Carga reducida para debuggin 
   val injectionProfile = Seq(
     constantConcurrentUsers(5) during (30.seconds)  // Solo 5 usuarios por 30 segundos
   )
