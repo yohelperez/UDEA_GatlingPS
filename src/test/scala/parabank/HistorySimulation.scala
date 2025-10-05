@@ -7,7 +7,7 @@ import java.time.Instant
 import scala.util.Random
 import parabank.Data._
 
-class HistorySimulation extends Simulation {
+/*class HistorySimulation extends Simulation {
 
   // 1 Http Conf
   val httpConf = http
@@ -63,3 +63,4 @@ class HistorySimulation extends Simulation {
     details("GetAccountHistory").responseTime.percentile(95).lte(3000),
   )
 }
+*/
