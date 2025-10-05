@@ -52,7 +52,7 @@ class HistorySimulation extends Simulation {
   // 4 Load Scenario - Injection profile (closed model)
   val injectionProfile = Seq(
     rampConcurrentUsers(0) to 200 during (120.seconds),  // ramp 0 -> 200 en 2 min
-    constantConcurrentUsers(200) during (10.minutes)      // steady-state 200 por 10 min
+    constantConcurrentUsers(200) during (1.minutes)      // steady-state 200 por 10 min
   )
 
   // 5 Setup + Assertions

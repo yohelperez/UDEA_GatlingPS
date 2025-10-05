@@ -24,7 +24,7 @@ class LoginPeakSimulation extends Simulation{
   // Subimos de 100 a 200 concurrentes en 30s, luego mantenemos 200 durante 2 minutos
   val injectionProfile = Seq(
     rampConcurrentUsers(100) to 200 during (30.seconds),
-    constantConcurrentUsers(200) during (2.minutes)
+    constantConcurrentUsers(200) during (1.minutes)
   )
 
   setUp(

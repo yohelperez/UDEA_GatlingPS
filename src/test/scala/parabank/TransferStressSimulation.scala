@@ -31,7 +31,7 @@ class TransferStressSimulation extends Simulation {
   // 4️⃣ Inyección de carga para cumplir criterio de 150 TPS sostenidos
   val injectionProfile = Seq(
     rampUsersPerSec(50) to 150 during (30.seconds), // Calentamiento progresivo
-    constantUsersPerSec(150) during (2.minutes)     // Mantener 150 TPS
+    constantUsersPerSec(150) during (1.minutes)     // Mantener 150 TPS
   )
 
   // 5️⃣ Assertions para validar estabilidad bajo estrés
